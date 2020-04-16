@@ -1,6 +1,5 @@
 import React from 'react';
-import Route from "react-router-dom/Route";
-import Switch from "react-router-dom/Switch";
+import { Route, Switch } from "react-router-dom";
 
 //CSS
 import './App.css';
@@ -12,18 +11,42 @@ import SignInAndSignUpPage from "./pages/sign-in-and-sign-up/sign-in-and-sign-up
 
 //COMPONENTS
 import Header from "./components/header/header.component";
+import { auth } from "./firebase/firebase.utils";
 
-function App() {
-  return (
-    <div className="app">
-      <Header />
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route exact path="/shop" component={ShopPage} />
-        <Route exact path="/signin" component={SignInAndSignUpPage} />
-      </Switch>
-    </div>
-  );
+class App extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      currentUser: null
+    }
+  }
+
+  unsubscribeFromAuth = null;
+  
+  componentDidMount() {
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
+      this.setState({currentUser: user});
+      console.log(this.state.currentUser);
+    })
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeFromAuth();
+  }
+
+  render() {
+    return (
+      <div className="app">
+        <Header currentUser={this.state.currentUser} />
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          <Route exact path="/shop" component={ShopPage} />
+          <Route exact path="/signin" component={SignInAndSignUpPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default App;
